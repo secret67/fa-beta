@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FA Beta — برنامج رسم لويندوز</title>
+<meta name="description" content="FA Beta: برنامج رسم وتلوين لويندوز. فرشك من فوتوشوب وProcreate وClip Studio، طبقات وPSD، وتحديد ذكي بنقرة. نسخة تجريبية مجانية.">
+<meta property="og:title" content="FA Beta — برنامج رسم لويندوز">
+<meta property="og:description" content="فرشك من فوتوشوب وProcreate وClip Studio في برنامج واحد. نسخة تجريبية.">
+<meta property="og:image" content="screenshot.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #181c23;      /* the app's own canvas surround */
+    --panel: #20252e;
+    --line: #2f3540;
+    --ink: #ede7dc;        /* warm off-white text */
+    --muted: #a39d93;
+    --brand: #5cc4e2;      /* the icon's cyan */
+    --brand-deep: #3a9fd0;
+    --cadmium: #f4b63f;
+    --alizarin: #e0485a;
+    --ultramarine: #4f6bff;
+    --on-brand: #0e1a22;
+    --display: 'Reem Kufi', 'IBM Plex Sans Arabic', sans-serif;
+    --body: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.75 var(--body); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brand); }
+  :focus-visible { outline: 3px solid var(--cadmium); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+
+  /* top bar */
+  .bar { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); font: 700 22px/1 var(--display); }
+  .brand img { width: 40px; height: 40px; border-radius: 10px; }
+  .brand small { font: 500 13px/1 var(--body); color: var(--on-brand); background: var(--cadmium); padding: 4px 8px; border-radius: 999px; }
+  .bar nav { display: flex; gap: 26px; }
+  .bar nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+  .bar nav a:hover { color: var(--ink); }
+
+  /* hero: the page is a canvas */
+  .hero { position: relative; min-height: min(780px, 100vh); overflow: hidden; border-bottom: 1px solid var(--line); }
+  #paint { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+  .hero-copy { position: relative; z-index: 2; padding: 9vh 0 120px; max-width: 620px; pointer-events: none; }
+  .hero-copy > * { pointer-events: auto; }
+  h1 { font: 700 clamp(48px, 8vw, 96px)/1.05 var(--display); margin: 0 0 22px; letter-spacing: 0; }
+  .lede { font-size: clamp(18px, 2vw, 21px); color: var(--ink); opacity: .86; max-width: 34em; margin: 0 0 36px; }
+  .download { display: inline-flex; align-items: center; gap: 14px; background: linear-gradient(135deg, #79d7ea, var(--brand-deep)); color: var(--on-brand);
+    font: 600 21px/1 var(--body); text-decoration: none; padding: 20px 30px; border-radius: 16px; box-shadow: 0 10px 30px -10px rgba(92, 196, 226, .55); transition: transform .15s ease, box-shadow .15s ease; }
+  .download:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -12px rgba(92, 196, 226, .7); }
+  .download:active { transform: translateY(0); }
+  .download svg { width: 24px; height: 24px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 18px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 15px; }
+  .hint { position: absolute; z-index: 2; inset-inline-start: max(20px, calc((100% - 1120px) / 2)); bottom: 84px; color: var(--muted); font-size: 14px; display: flex; gap: 10px; align-items: center; }
+  .hint button { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .hint button:hover { border-color: var(--muted); }
+
+  /* sections */
+  section { padding: 96px 0; }
+  h2 { font: 700 clamp(30px, 4vw, 44px)/1.2 var(--display); margin: 0 0 14px; }
+  .sub { color: var(--muted); margin: 0 0 44px; max-width: 40em; }
+
+  .shot { margin: -60px auto 0; position: relative; z-index: 2; }
+  .shot img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .7); }
+  .shot figcaption { color: var(--muted); font-size: 14px; margin-top: 12px; }
+
+  .features { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px 72px; }
+  .feature { display: grid; grid-template-columns: 14px 1fr; gap: 0 18px; }
+  .feature::before { content: ''; width: 14px; height: 54px; border-radius: 7px; background: var(--c, var(--brand)); margin-top: 8px; }
+  .feature h3 { font: 600 22px/1.4 var(--body); margin: 0 0 6px; }
+  .feature p { margin: 0; color: var(--muted); }
+  .feature.big { grid-row: span 2; }
+  .feature.big h3 { font: 700 30px/1.3 var(--display); }
+  .feature.big::before { height: 120px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 64px 1fr; gap: 0 22px; padding: 26px 0; border-top: 1px solid var(--line); }
+  .steps li::before { content: counter(s); font: 700 34px/1 var(--display); color: var(--brand); padding-top: 4px; }
+  .steps h3 { margin: 0 0 4px; font: 600 20px/1.4 var(--body); }
+  .steps p { margin: 0; color: var(--muted); }
+  .install { display: grid; grid-template-columns: 1fr 420px; gap: 64px; align-items: start; }
+
+  /* SmartScreen look-alike (so people recognise it) */
+  .smartscreen { direction: ltr; text-align: left; background: #0d5fa8; color: #fff; border-radius: 8px; padding: 26px 26px 20px; font: 400 14px/1.5 'Segoe UI', system-ui, sans-serif; box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .8); position: sticky; top: 24px; }
+  .smartscreen strong { display: block; font: 300 26px/1.2 'Segoe UI Light', 'Segoe UI', sans-serif; margin-bottom: 14px; }
+  .smartscreen .more { color: #fff; text-decoration: underline; outline: 2px dashed var(--cadmium); outline-offset: 3px; border-radius: 2px; }
+  .smartscreen .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 26px; }
+  .smartscreen .btn { border: 1px solid #fff; padding: 6px 18px; color: #fff; }
+  .smartscreen .btn.run { outline: 2px dashed var(--cadmium); outline-offset: 3px; }
+  .smartscreen .tag { direction: rtl; text-align: right; margin-top: 16px; color: var(--cadmium); font: 500 14px/1.5 var(--body); }
+
+  .notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; }
+  .notes h3 { font: 600 22px/1.4 var(--body); margin: 0 0 8px; }
+  .notes p, .notes li { color: var(--muted); }
+  .notes ul { margin: 0; padding-inline-start: 1.1em; }
+  .notes b { color: var(--ink); font-weight: 500; }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
+  .hash { direction: ltr; font-size: 12px; word-break: break-all; opacity: .8; }
+
+  @media (max-width: 860px) {
+    .bar nav { display: none; }
+    .features, .install, .notes { grid-template-columns: 1fr; }
+    .feature.big { grid-row: auto; }
+    .smartscreen { position: static; }
+    .hero-copy { padding-top: 6vh; }
+    .hint { bottom: 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .download { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <canvas id="paint" aria-label="مساحة رسم: ارسم بالماوس أو القلم"></canvas>
+  <div class="wrap">
+    <div class="bar">
+      <a class="brand" href="#top"><img src="icon.png" alt="" width="40" height="40">FA <small>Beta</small></a>
+      <nav aria-label="أقسام الصفحة"><a href="#features">وش فيه</a><a href="#install">التثبيت</a><a href="#notes">الخصوصية والأخطاء</a></nav>
+    </div>
+    <div class="hero-copy">
+      <h1>ارسم بفرشك أنت.</h1>
+      <p class="lede">برنامج رسم لويندوز يقرأ فرش فوتوشوب وProcreate وClip Studio ويرسم فيها نفس الأصل. هذي نسخة تجريبية، جرّبها وقل لي رأيك.</p>
+      <a class="download" id="dl" href="https://github.com/secret67/fa-beta/releases/latest/download/FA-Beta-Setup-1.15.0-beta.1.exe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        نزّل FA Beta لويندوز
+      </a>
+      <ul class="facts">
+        <li>الإصدار <bdi dir="ltr">1.15.0-beta.1</bdi></li>
+        <li>119 ميجا</li>
+        <li>ويندوز 10 و 11 <bdi dir="ltr">(64-bit)</bdi></li>
+        <li>مجاني</li>
+      </ul>
+    </div>
+  </div>
+  <p class="hint" id="hint">جرّب ترسم هنا بالماوس أو القلم <button type="button" id="clear">امسح</button></p>
+</header>
+
+<main>
+  <div class="wrap">
+    <figure class="shot">
+      <img src="screenshot.png" alt="واجهة FA Beta: لوحة الرسم في الوسط، والفرش والألوان والطبقات على الجوانب" width="1600" height="960" loading="lazy">
+      <figcaption>لقطة حقيقية من البرنامج.</figcaption>
+    </figure>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <h2>كل اللي تحتاجه عشان ترسم</h2>
+      <p class="sub">FA مصنوع لشي واحد: إنك ترسم بالإحساس اللي تعودت عليه، بدون ما تحتاج ثلاث برامج.</p>
+      <div class="features">
+        <div class="feature big" style="--c: var(--brand)">
+          <div><h3>فرشك تنتقل معك</h3><p>استورد فرش فوتوشوب (ABR) وProcreate وClip Studio، وكمان فرش Clip Studio المثبّتة على جهازك بضغطة وحدة. البرنامج يقول لك عن كل إعداد: انقل كما هو، أو تقريبي، أو غير مدعوم، فما فيه مفاجآت.</p></div>
+        </div>
+        <div class="feature" style="--c: var(--cadmium)">
+          <div><h3>طبقات وPSD</h3><p>طبقات ومجموعات وأقنعة وأوضاع مزج وطبقات تعديل. يفتح ويصدّر PSD، ويفتح ملفات Clip Studio.</p></div>
+        </div>
+        <div class="feature" style="--c: var(--alizarin)">
+          <div><h3>تحديد ذكي بنقرة</h3><p>انقر على أي شي في رسمتك ويتحدد لحاله، حتى على الرسم الخطي. الذكاء الاصطناعي يشتغل على جهازك.</p></div>
+        </div>
+        <div class="feature" style="--c: var(--ultramarine)">
+          <div><h3>Liquify حسب الوجه</h3><p>كبّر العيون، عدّل الأنف والفم وشكل الوجه بسلايدرات. ولوجوه الأنمي تحط النقاط بيدك.</p></div>
+        </div>
+        <div class="feature" style="--c: #8fd694">
+          <div><h3>مسوّى للقلم</h3><p>ضغط وميلان ودوران القلم، ومساطر منظور، وتماثل، ونص عربي من اليمين لليسار.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" style="background: var(--panel)">
+    <div class="wrap install">
+      <div>
+        <h2>التثبيت</h2>
+        <p class="sub">دقيقة وحدة. الخطوة الثالثة هي الوحيدة اللي تحتاج انتباه.</p>
+        <ol class="steps">
+          <li><div><h3>نزّل الملف</h3><p>اضغط زر التنزيل فوق، بينزل لك <bdi>FA-Beta-Setup-1.15.0-beta.1.exe</bdi>.</p></div></li>
+          <li><div><h3>افتحه</h3><p>من مجلد التنزيلات، دبل كليك على الملف.</p></div></li>
+          <li><div><h3>تخطَّ رسالة ويندوز الزرقاء</h3><p>البرنامج جديد ولسا ما عنده توقيع رسمي من مايكروسوفت، فويندوز يحذّرك. اضغط <b>More info</b> وبعدها <b>Run anyway</b>.</p></div></li>
+          <li><div><h3>كمّل التثبيت وارسم</h3><p>بيطلع لك اختصار <b>FA Beta</b> على سطح المكتب.</p></div></li>
+        </ol>
+      </div>
+      <div class="smartscreen" role="img" aria-label="شكل رسالة ويندوز: اضغط More info ثم Run anyway">
+        <strong>Windows protected your PC</strong>
+        Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.<br>
+        <span class="more">More info</span>
+        <div class="row"><span class="btn run">Run anyway</span><span class="btn">Don't run</span></div>
+        <p class="tag">اضغط <bdi>More info</bdi>، وبعدها يطلع لك زر <bdi>Run anyway</bdi>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="notes">
+    <div class="wrap notes">
+      <div>
+        <h2>رسوماتك تبقى عندك</h2>
+        <p>رسوماتك وإعداداتك وفرشك تنحفظ على جهازك بس، وما ينرفع شي لأي مكان. البرنامج ما يتصل بالإنترنت إلا لشيين:</p>
+        <ul>
+          <li>تنزيل نموذج الذكاء الاصطناعي أول مرة تستخدم التحديد الذكي أو Liquify حسب الوجه.</li>
+          <li>يشوف إذا فيه تحديث جديد. وما يثبّت شي إلا لما يسألك: <b>«فيه تحديث جديد، تثبّته الحين؟»</b></li>
+        </ul>
+      </div>
+      <div>
+        <h2>لو صار خطأ</h2>
+        <p>نسخة تجريبية، فاحفظ شغلك كثير (Ctrl+S). ولو صار شي غلط:</p>
+        <ul>
+          <li>من قائمة <b>مساعدة</b> اختر <b>نسخ معلومات الجهاز</b> والصقها في رسالة.</li>
+          <li>من نفس القائمة اختر <b>فتح مجلد تقارير الأخطاء</b> وأرسل آخر ملف.</li>
+          <li>اكتب وش كنت تسوي قبل الخطأ بالضبط.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><bdi dir="ltr">FA Beta 1.15.0-beta.1</bdi> لويندوز</span>
+    <span class="hash" title="SHA-256 لملف التثبيت">SHA-256: 279e53cf9395eecfaee462b046b1520ce32cd92e287223f041a357378423e275</span>
+  </div>
+</footer>
+
+<script>
+// The hero is a canvas: paint with the mouse, pen or finger. The stroke swells with pen pressure (or slows down = thicker
+// with a mouse), like a soft round brush. One stroke paints itself when the page opens.
+(() => {
+  const cv = document.getElementById('paint'), g = cv.getContext('2d');
+  const colors = ['#5cc4e2', '#f4b63f', '#e0485a', '#4f6bff', '#8fd694'];
+  let ci = 0, last = null, dpr = 1;
+  function size() {
+    const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1);
+    const keep = cv.width ? g.getImageData(0, 0, cv.width, cv.height) : null;
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.lineCap = 'round'; g.lineJoin = 'round';
+    if (keep) g.putImageData(keep, 0, 0);
+  }
+  function dab(a, b, w, color) {
+    g.strokeStyle = color; g.lineWidth = w; g.globalAlpha = 0.92;
+    g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+  }
+  const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, t: e.timeStamp, p: e.pressure }; };
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); last = pos(e); last.w = 8; ci = (ci + 1) % colors.length; document.getElementById('hint').style.opacity = .5; });
+  cv.addEventListener('pointermove', e => {
+    if (!last) return;
+    for (const ev of (e.getCoalescedEvents?.() || [e])) {
+      const p = pos(ev), d = Math.hypot(p.x - last.x, p.y - last.y), dt = Math.max(1, p.t - last.t);
+      const target = ev.pointerType === 'pen' && p.p > 0 ? 4 + p.p * 34 : Math.max(5, 30 - (d / dt) * 9);
+      p.w = last.w + (target - last.w) * 0.25;
+      dab(last, p, p.w, colors[ci]); last = p;
+    }
+  });
+  const up = () => { last = null; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  document.getElementById('clear').addEventListener('click', () => g.clearRect(0, 0, cv.width, cv.height));
+  addEventListener('resize', size); size();
+
+  // the opening stroke: a loose brush swash across the lower right of the hero
+  const W = cv.width / dpr, H = cv.height / dpr;
+  const pts = Array.from({ length: 90 }, (_, i) => { const t = i / 89; return { x: W * (0.06 + 0.55 * t), y: H * (0.78 - 0.18 * Math.sin(t * Math.PI * 1.15)) + Math.sin(t * 9) * 6, w: 6 + 26 * Math.sin(t * Math.PI) }; });
+  const second = pts.map((p, i) => ({ x: p.x + W * 0.04, y: p.y + 34 + Math.sin(i / 7) * 4, w: p.w * 0.45 }));
+  const draw = (list, color, i) => { if (i < list.length) dab(list[i - 1], list[i], list[i].w, color); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { for (let i = 1; i < 90; i++) { draw(pts, colors[0], i); draw(second, colors[1], i); } }
+  else { let i = 1; const step = () => { draw(pts, colors[0], i); if (i > 20) draw(second, colors[1], i - 20); i++; if (i < 110) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+})();
+</script>
+</body>
+</html>
